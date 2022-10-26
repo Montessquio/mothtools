@@ -9,7 +9,7 @@ description = "A collection of command-line tools and libraries to assist in cre
 
 [lib]
 name = "mothlib"
-path = "src/lib.rs"
+path = "mothlib/lib.rs"
 
 [[bin]]
 name = "laidlaw"

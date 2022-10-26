@@ -25,9 +25,22 @@ Laidlaw can read and write Lantern IR with the following formats:
 Crucible is a compiler for the Crucible DSL, a concise language used to describe Cultist Simulator
 content quickly and efficiently. Crucible reads, interprets, and applies transformations to code
 written in the Crucible language, and outputs it in the Lantern IR format usable by the rest
-of the Mothtools suite.
+of the Mothtools suite. For more information on the Crucible DSL and its compiler, please refer to
+`crucible/README.md`.
 
 ## Under the Hood
+
+### Attributes
+
+Crucible allows mod authors to specify *Attributes* both on the whole mod
+and on individual components. While the rest of the Lantern IR format is
+bidirectionally compatible with base Cultist Simulator mod files, attributes
+are the exception.
+
+In order to retain lossless conversion, all component attributes will be serialized
+into the "comment" field on all components for which it is applied. Attributes applying
+to the mod itself will be placed as a comment in an empty Attribute element named
+`<MOD_NAME>.::CrucibleMetaData.GlobalAttrs`.
 
 ### The Lantern Format
 

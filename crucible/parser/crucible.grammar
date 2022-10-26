@@ -35,7 +35,7 @@ AspectQuick:
 
 AspectStatement:
     "SET" "=" <Value>
-  | "DECAY" NUMBER <DefKey>?
+  | "DECAY" <DefKey>
   | "SPAWN" <DefKey> <Chance>?
   | <Xtrigger>
 
@@ -65,7 +65,7 @@ CardStatementQuick:
   | <Xtrigger>
 
 Deck:
-    "mansus"? "deck" <DefKey> STRING_LITERAL <DescriptionParam>? "{" <DeckCardRef>* "}"
+    deck" <DefKey> STRING_LITERAL <DescriptionParam>? "{" <DeckCardRef>* "}"
 
 DeckCardRef:
     "!" <DefKey>
@@ -113,8 +113,9 @@ Branch:
   | "GOTO" <DefKey> <BranchCondition>? <SpawningKind>?
 
 BranchCondition:
+    "if" <Chance> "(" <RecipeRequirement>* ")"
+  | "if" "(" <RecipeRequirement>* ")"
   | <Chance>
-  | "if" <Chance> <ParamList>
 
 SpawningKind:
     "->" "SPAWN"

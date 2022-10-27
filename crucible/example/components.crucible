@@ -1,0 +1,35 @@
+// All elements defined in this block
+// will have their in-game IDs prepended
+// with "monty.examplemod"
+namespace monty.examplemod {
+    // This will have an in-game ID of "monty.examplemod.lantern"
+    aspect lantern "Lantern" "The aspect of Light."
+
+    aspect moth "Moth" "The aspect of Chaos."
+
+    aspect grail "Grail" "The Aspect of Desire."
+
+    aspect special "Special Aspect" "This Aspect has additional parameters." {
+        // It is possible to directly manipulate JSON values
+        set key = "value";
+        set key2 = 123;
+        set key3 = NULL;
+        // Support for directly embedding complex JSON is on the backburner; 
+        // I'll prioritize it if it turns out to be needed.
+
+        // IDs set in the namespace will automatically be prepended
+        // as well. This xtrigger will be catalyzed by "monty.examplemod.lantern"
+        Xtrigger lantern -> moth 100%;
+        // You can define more than one xtrigger by simply repeating
+        // another xtrigger declaration
+        // ----
+        // In order to specify the "root" namespace
+        // where the vanilla game objects are stored,
+        // prepend your ID with a "."
+        // This only works in references, not IDs used to declare
+        // new components.
+        Xtrigger .grail -> grail 100; // this Xtrigger will transform the base game's Grail into "monty.examplemod.grail"
+    }
+
+
+}

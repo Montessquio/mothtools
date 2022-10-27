@@ -1,0 +1,174 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = { LineComment | MultiComment }
+MultiComment = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+LineComment = _{ "//" ~ (!"\n" ~ ANY)* }
+
+Crucible = { SOI ~ GlobalAttr* ~ Unit* ~ EOI }
+
+GlobalAttr = ${ "#" ~ "!" ~ "[" ~ DefKey ~ "]" }
+LocalAttr = ${ "#" ~ "[" ~ DefKey ~ "]" }
+
+Unit = _{
+    LocalAttr* ~ Namespace
+  | LocalAttr* ~ Component
+}
+
+Namespace = { ^"namespace" ~ DefKey ~ "{" ~ Unit* ~ "}" }
+Component = _{ Inherit? ~ Object }
+    Inherit = { ^"from" ~ DefKey }
+
+Object = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
+
+    Aspect = { Hidden? ~ ^"aspect" ~ DefKey ~ String ~ String? ~ AspectDecays? ~ AspectStatementList? }
+        AspectDecays = { "->" ~ DefKey }
+        AspectStatementList = { "{" ~ (AspectStatement ~ ";" )* ~ "}" }
+        AspectStatement = !{
+            ^"set" ~ DefKey ~ "=" ~ Value
+          | ^"decay" ~ DefKey
+          | ^"induce" ~ DefKey ~ Chance?
+          | Xtrigger
+        }
+    Card   = { Hidden? ~ ^"card" ~ DefKey ~ String ~ String? ~ CardAspects ~ CardDecays? ~ CardStatementList}
+        Hidden = { ^"hidden" | "?" }
+        CardDecays = { 
+            "->" ~ DefKey ~ Number?
+          | "->" ~ Number
+        }
+        CardAspects = { "(" ~ (QuantityDefPair ~ ( "," ~ QuantityDefPair )*)? ~ ")" }
+        CardStatementList = { "{" ~ (CardStatement ~ ";" )* ~ "}" }
+        CardStatement = !{
+            
+          | ^"induce" ~ DefKey ~ Chance?
+          | ^"unique" ~ DefKey?
+          | DefKey ~ "->" ~ SlotDef
+          | Xtrigger
+        }
+
+    Deck   = { ^"deck" ~ DefKey ~ String? ~ DeckCardRefList }
+        DeckCardRefList = { 
+            "!" ~ DefKey
+          | DefKey ~ String
+          | DefKey
+         }
+
+    // Verb "recipe" id
+    Recipe = { RecipeKind ~ DefKey ~ ^"recipe" ~  DefKey ~ RecipeRequirements ~ MaxExecutions? ~ RecipeStage ~ (Inherit? ~ RecipeStage)* }
+        RecipeKind = {
+              ^"craft" ~ ^"hint"
+            | ^"hint" ~  ^"craft"
+            | ^"craft"
+            | ^"hint"
+            | ^"!" ~ ^"?"
+            | ^"?" ~ ^"!"
+            | ^"?"
+            | ^"!"
+        }
+        RecipeRequirements = { "(" ~ RecipeReq ~ ( "," ~ RecipeReq)* ~ ")" }
+            RecipeReq = {
+                ^"table" ~ QuantityDefPair
+              | ^"extant" ~ QuantityDefPair
+              | QuantityDefPair
+            }
+        RecipeStage = { "{" ~ (RecipeStatement ~ ";" )* ~ "}" }
+        RecipeStatement = !{
+            ^"set" ~ DefKey ~ "=" ~ Value
+          | ^"warmup" ~ Number
+          | ^"apply" ~ ApplyParams
+          | ^"draw" ~ DefKey ~ Number?
+          | ^"signal" ~ DefKey
+          | ^"purge" ~ DefKey ~ Number?
+          | ^"burn" ~ DefKey
+          | ^"portal" ~ DefKey
+          | ^"ending" ~ DefKey ~ DefKey?
+          | ^"halt" ~ DefKey?
+          | ^"delete" ~ DefKey?
+          | SlotDef
+          | Branch
+        }
+        MaxExecutions = { ^"max" ~ Number }
+        ApplyParams = {
+            DefKey? ~ DefKey ~ ApplyOp ~ Number
+          | DefKey ~ "=" ~ DefKey
+        }
+            ApplyOp = ${ "+=" | "-=" }
+        Branch = {
+            ^"link" ~ DefKey ~ BranchCondition?
+          | ^"goto" ~ DefKey ~ BranchCondition? ~ SpawningKind?
+        }
+            BranchCondition = {
+                ^"if" ~ Chance? ~ RecipeRequirements
+              | Chance
+            }
+            SpawningKind = {
+                "->" ~ ^"spawn"
+              | "->" ~ ^"expel" ~ ( "{" ~ QuantityDefPair ~ ( "," ~ QuantityDefPair)* ~ "}" )?
+            }
+
+
+    Verb = { ^"verb" ~ DefKey ~ String ~ String ~ VerbSlot? }
+        VerbSlot = { "(" ~ SlotDef ~ ")" }
+
+    Legacy = { ^"legacy" ~ DefKey }
+    Ending = { ^"ending" ~ DefKey }
+
+SlotDef = { SlotKind? ~ ^"slot" ~ DefKey ~ String ~ String ~ SlotParams? }
+    SlotKind = { 
+        ^"consume" ~ ^"greedy"
+      | ^"greedy" ~ ^"consume"
+      | ^"consume"
+      | ^"greedy"
+      | ^"!" ~ ^"?"
+      | ^"?" ~ ^"!"
+      | ^"?"
+      | ^"!"
+    }
+    SlotParams = { "(" ~ SlotFilter ~ ( "," ~ SlotFilter )* ~ ")" }
+    SlotFilter = { "!"? ~ QuantityDefPair }
+
+Xtrigger = { ^"xtrigger" ~ DefKey ~ "->" ~ XtriggerBody }
+    XtriggerBody = {
+        DefKey ~ Chance?
+      | ^"spawn" ~ QuantityDefPair ~ Chance?
+      | ^"mutate" ~ QuantityDefPair ~ Chance?
+    }
+
+QuantityDefPair = {
+    DefKey
+  | DefKey ~ ":" ~ Number
+}
+
+DefKey = @{ DefKey_Char+ }
+DefKey_Char = { 
+    ('a'..'z')
+  | ('A'..'Z')
+  | ('0'..'9')
+  | ('_'..'_')
+  | ('-'..'-')
+  | ('$'..'$')
+  | ('.'..'.')
+}
+
+Chance = { Number ~ "%"? }
+
+Value = ${
+    "NULL"
+  | Number
+  | Boolean
+  | String
+  | FileRef
+}
+
+Number = @{ "-"? ~ Digit+ }
+Digit = { '0'..'9' }
+
+Boolean = { ^"true" | ^"false" }
+
+FileRef = ${ "@" ~ String }
+
+String = ${ "\"" ~ String_Inner ~ "\"" }
+String_Inner = @{ String_Inner_Char* }
+String_Inner_Char = {
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}

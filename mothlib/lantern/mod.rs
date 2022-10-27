@@ -4,7 +4,8 @@ use anyhow::{Result, bail};
 use either::Either;
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+/// An ID referencing an in-game component.
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct DefKey(String);
 
 /// Lantern Intermediate Representation format.
@@ -572,7 +573,7 @@ pub enum SlotFilter {
     /// Required can be put in the slot, unlike the requirements 
     /// property for recipes. Only uses positive values.
 
-    Require{ element: DefKey, amount: u32},
+    Accept { element: DefKey, amount: u32},
     /// Any card that meets any one of a Forbidden property
     /// cannot be put in the slot, even if it qualifies for 
     /// the Required list.

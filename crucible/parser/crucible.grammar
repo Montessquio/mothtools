@@ -24,19 +24,12 @@ ObjDef:
   | <Ending>
 
 Aspect:
-    <AspectDef>
-  | <AspectQuick>
-
-AspectDef:
-    <Hidden>? "aspect" <DefKey> "{" <AspectStatement>* "}"
-
-AspectQuick:
-    <Hidden>? "aspect" <DefKey> STRING_LITERAL <DescriptionParam>? "->" <Chance> <DefKey> "{" <AspectStatement> "}" "->" <DefKey> <Chance>?
+    <Hidden>? "aspect" <DefKey> STRING_LITERAL <DescriptionParam>? "->" <DefKey> "{" <AspectStatement> "}" "->" <DefKey> <Chance>?
 
 AspectStatement:
     "SET" "=" <Value>
   | "DECAY" <DefKey>
-  | "SPAWN" <DefKey> <Chance>?
+  | "INDUCE" <DefKey> <Chance>?
   | <Xtrigger>
 
 Card:
@@ -51,10 +44,10 @@ CardQuick:
 
 CardStatement:
     "SET" "=" <Value>
-  | "ASPECTS" <CardRequirements>
+  | "ASPECTS" <ParamList>
   | "UNIQUE" <DefKey>?
   | "DECAY" NUMBER <DefKey>?
-  | "SPAWN" <DefKey> <Chance>?
+  | "INDUCE" <DefKey> <Chance>?
   | <DefKey> "->" <SlotDef>
   | <Xtrigger>
 
@@ -189,6 +182,7 @@ Value:
     STRING_LITERAL
   | NUMBER
   | BOOLEAN
+  | NULL
 
 BOOLEAN:
     "true"

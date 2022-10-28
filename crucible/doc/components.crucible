@@ -3,7 +3,8 @@
 // with "monty.examplemod"
 namespace monty.examplemod {
     // This will have an in-game ID of "monty.examplemod.lantern"
-    aspect lantern "Lantern" "The aspect of Light."
+    #[no_mangle]
+    hidden aspect lantern "Lantern" "The aspect of Light."
 
     aspect moth "Moth" "The aspect of Chaos."
 
@@ -11,7 +12,7 @@ namespace monty.examplemod {
 
     aspect special "Special Aspect" "This Aspect has additional parameters." {
         // It is possible to directly manipulate JSON values
-        set key = "value";
+        set key = 
         set key2 = 123;
         set key3 = NULL;
         // Support for directly embedding complex JSON is on the backburner; 
@@ -30,6 +31,34 @@ namespace monty.examplemod {
         // new components.
         Xtrigger .grail -> grail 100; // this Xtrigger will transform the base game's Grail into "monty.examplemod.grail"
     }
+}
 
+namespace monty.examplemod.recipes {
+    dream recipe customDream(lantern:6, moth:2) {
+        // rest of recipe omitted for brevity
 
+        // Crucible will automatically monomorphize new recipes
+        // if a link or goto statement's conditional does not
+        // match the target recipe's requirements.
+
+        // Note how this branch wants to link if
+        // there is 8 lantern in the recipe, but
+        // the target recipe requires 12 lantern.
+        link customDreamResolve if(lantern:8);
+    }
+
+    dream recipe customDreamResolve(lantern:12) {
+        // recipe omitted
+    }
+
+    // If a requirement conflict like above
+    // is detected, crucible will silently
+    // create a new recipe that looks like
+    // the one below.
+    // This recipe won't show up in your
+    // crucible source code, only in the final
+    // cultsim file.
+    dream recipe customDreamResolve.__monoTQ3FF4jnj(lantern:12) {
+        // Everything else in this recipe is the same as in the base recipe.
+    }
 }

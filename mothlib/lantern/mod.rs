@@ -1,12 +1,13 @@
 use std::{collections::HashMap, ops::{Deref, DerefMut}};
-
 use anyhow::{Result, bail};
 use either::Either;
 use serde::{Serialize, Deserialize};
 
+pub mod json;
+
 /// An ID referencing an in-game component.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct DefKey(String);
+pub struct DefKey(pub String);
 
 /// Lantern Intermediate Representation format.
 /// This is the primary structure used to manipulate
@@ -14,7 +15,7 @@ pub struct DefKey(String);
 /// 
 /// The Lantern struct represents an entire
 /// mod. 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Lantern {
     /// List of all attributes that apply to the whole mod.
     attributes: Vec<Attribute>,
@@ -31,18 +32,18 @@ pub struct Lantern {
     endings: HashMap<DefKey, Ending>,
 }
 
-/// An Attribute is a raw string, it is handled
-/// by extensions that read them.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Attribute {
-    value: String
-}
+/// An Attribute is one or more defkeys, 
+/// it is handled by extensions that read them.
+/// Apart from a few builtins, Crucible
+/// does not interact with attributes.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Attribute{ pub key: DefKey, pub value: Option<json::Value> }
 
 /// A namespace is a collection of components
 /// which describe its position within the
 /// namespace hierarchy, and a collection
 /// of attributes that have been applied to it.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct NamespaceMeta {
     components: Vec<DefKey>,
     attributes: Vec<Attribute>,
@@ -52,14 +53,14 @@ pub struct NamespaceMeta {
 /// engine calls "Elements". Aspects are more
 /// limited than cards, and act as metadata
 /// that can be applied to other engine components.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Aspect {
     /// This is the in-game representation for
     /// this aspect. It is made up of the name
     /// of the aspect, e.g. "lantern", and the
     /// namespace it is defined in, e.g.
     /// "core.aspects" -> id = "core.aspects.lantern"
-    id: DefKey,
+    pub id: DefKey,
     /// This is the title text that appears in the
     /// dialogue created when clicking on the aspect.
     label: String,
@@ -108,14 +109,14 @@ pub struct Aspect {
 /// the engine calls "Elements". Cards are nouns,
 /// things that can be acted upon by the player
 /// or the engine using a Verb.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Card {
     /// This is the in-game representation for
     /// this card. It is made up of the name
     /// of the card, e.g. "fragmentlantern", and the
     /// namespace it is defined in, e.g.
     /// "core.cards" -> id = "core.cards.fragmentlantern"
-    id: DefKey,
+    pub id: DefKey,
     /// This is the title text that appears on the
     /// card when it is on the table as well as the
     /// title of the dialogue created when clicking 
@@ -198,14 +199,14 @@ pub struct Card {
 /// A deck is a collection of Cards which
 /// recipes can randomly draw from to produce
 /// cards.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Deck {
     /// This is the in-game representation for
     /// this deck. It is made up of the name
     /// of the deck, e.g. "mansuswoodresults", and the
     /// namespace it is defined in, e.g.
     /// "core.decks" -> id = "core.decks.mansuswoodresults"
-    id: DefKey,
+    pub id: DefKey,
     /// This is the title text that appears on the
     /// dialog produced when a face-down card produced from it
     /// is clicked.
@@ -237,7 +238,7 @@ pub struct Deck {
 
 /// Defines the types of colors a recipe's
 /// progress circle can be set to.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum WarmupStyle {
     /// No style
     None,
@@ -258,7 +259,7 @@ pub enum WarmupStyle {
 /// a record by some amount. It is also
 /// used to define requirement comparison
 /// operations (see [RecipeRequirement]).
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ValueOperation {
     Set(u32),
     Add(i32),
@@ -266,7 +267,7 @@ pub enum ValueOperation {
 
 /// Defines the type challenge used in 
 /// a flow control conditional.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum ChallengeKind {
     /// A base challenge scales the chance into 
     /// a histogram based on the level of the 
@@ -287,7 +288,7 @@ pub enum ChallengeKind {
 /// that must be present in some way
 /// before a recipe can be crafted
 /// or branched to.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum RecipeRequirement {
     /// Requires the element be present
     /// within the recipe’s element stack. 
@@ -320,7 +321,7 @@ pub enum RecipeRequirement {
 /// If `chance` is None and `requirements` is empty,
 /// then this BranchCondition represents an
 /// unconditional branch.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct BranchCondition {
     /// A branch will only be followed if a random
     /// value between 1 and 100 is less than or equal
@@ -335,7 +336,7 @@ pub struct BranchCondition {
 
 /// Defines the branching behavior when
 /// a branch with this item is followed.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum SpawningKind {
     /// If a branch with this property is followed,
     /// a new situation token will be generated for
@@ -352,7 +353,7 @@ pub enum SpawningKind {
 
 /// Defines the types of control flow instructions
 /// supported by the scheme.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Branch {
     /// Defines a recipe to be followed once the previous recipe is finished.
     /// 
@@ -378,10 +379,10 @@ pub enum Branch {
 /// Mutations are used to add or remove aspects from an element. 
 /// Mutated aspects remain even when the element changes via 
 /// xtrigger or decay.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Mutation {
     /// Used to find the card or aspect that will be modified.
-    id: DefKey,
+    pub id: DefKey,
     /// The aspect we are adding/removing on the element. 
     aspect: DefKey,
     /// The operation to commit
@@ -391,14 +392,14 @@ pub struct Mutation {
 /// A recipe is a "sentence". They
 /// combine a Noun with a Verb in order to
 /// produce some consequence in-game.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Recipe {
     /// This is the in-game representation for
     /// this deck. It is made up of the name
     /// of the deck, e.g. "exitmansuswood", and the
     /// namespace it is defined in, e.g.
     /// "core.recipes" -> id = "core.recipes.exitmansuswood"
-    id: DefKey,
+    pub id: DefKey,
     /// The ID of the verb which this recipe executes in.
     verb: DefKey,
     /// The title of the verb dialogue will be set to this
@@ -534,14 +535,14 @@ pub struct Recipe {
 /// A place to put a card, which could be used in
 /// elements, verbs, or recipes. They act as filters,
 /// only accepting cards that match their requirements.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Slot {
     /// This is the in-game representation for
     /// this deck. It is made up of the name
     /// of the deck, e.g. "slotinfluence", and the
     /// namespace it is defined in, e.g.
     /// "core.slot" -> id = "core.slot.slotinfluence"
-    id: DefKey,
+    pub id: DefKey,
     /// This is the title text that appears above the
     /// slot as well as on the dialog produced when 
     /// the slot is clicked.
@@ -567,7 +568,7 @@ pub struct Slot {
 
 /// A n element which is either required for or
 /// forbidden from insertion a slot.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum SlotFilter {
     /// Any card that meets any one of the properties in 
     /// Required can be put in the slot, unlike the requirements 
@@ -585,14 +586,14 @@ pub enum SlotFilter {
 /// are permanent, but a Recipe can
 /// create temporary verbs that vanish once
 /// their recipes resolve.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Verb {
     /// This is the in-game representation for
     /// this verb. It is made up of the name
     /// of the verb, e.g. "dream", and the
     /// namespace it is defined in, e.g.
     /// "core.verb" -> id = "core.verb.dream"
-    id: DefKey,
+    pub id: DefKey,
     /// This is the title that appears in the 
     /// Verb UI when no card is inserted.
     label: String,
@@ -608,14 +609,14 @@ pub struct Verb {
 
 /// Legacies define the starting conditions
 /// for a game mode.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Legacy {
     /// This is the in-game representation for
     /// this legacy. It is made up of the name
     /// of the legacy, e.g. "apostlelantern", and the
     /// namespace it is defined in, e.g.
     /// "core.legacy" -> id = "core.legacy.apostlelantern"
-    id: DefKey,
+    pub id: DefKey,
     /// The name of the Legacy as the player sees it
     label: String,
     /// Text displayed in the Legacy Selection screen
@@ -656,7 +657,7 @@ pub struct Legacy {
 
 /// Decides the music played during the ending
 /// transition.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum EndingMusicKind {
     Grand,
     Melancholy,
@@ -665,7 +666,7 @@ pub enum EndingMusicKind {
 
 /// Decides the color of the lights and cosmetics of the ending
 /// transition.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum EndingAnimationKind {
     DramaticLight,
     DramaticLightCool,
@@ -676,14 +677,14 @@ pub enum EndingAnimationKind {
 /// Endings define the screen that appears
 /// when the game encounters a win or loss
 /// condition.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Ending {
     /// This is the in-game representation for
     /// this ending. It is made up of the name
     /// of the ending, e.g. "apostlelantern", and the
     /// namespace it is defined in, e.g.
     /// "core.ending" -> id = "core.ending.apostlelantern"
-    id: DefKey,
+    pub id: DefKey,
     /// The name of the Ending as displayed on the Ending Screen to the player.
     label: String,
     // The text shown to the player on the ending screen
@@ -704,7 +705,7 @@ pub struct Ending {
 /// the card it belongs to, and/or spawn new cards.
 /// 
 /// XTriggers apply when they are in a recipe with a specific catalyst present.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Xtrigger {
     /// The default behavior of an Xtrigger. A catalyzing element is turned into
     /// another element with the specified probability. The effect of *amount*
@@ -756,4 +757,3 @@ impl DerefMut for Probability {
         &mut self.inner
     }
 }
-

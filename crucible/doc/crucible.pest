@@ -1,23 +1,23 @@
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
-COMMENT = { LineComment | MultiComment }
+COMMENT = _{ LineComment | MultiComment }
 MultiComment = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 LineComment = _{ "//" ~ (!"\n" ~ ANY)* }
 
 Crucible = { SOI ~ GlobalAttr* ~ Unit* ~ EOI }
 
-GlobalAttr = ${ "#" ~ "!" ~ "[" ~ DefKey ~ "]" }
-LocalAttr = ${ "#" ~ "[" ~ DefKey ~ "]" }
+GlobalAttr = ${ "#" ~ "!" ~ Attr }
+LocalAttr = ${ "#" ~ Attr }
+Attr = _{ "[" ~ (WHITESPACE* ~ DefKey)+ ~ "]" }
 
-Unit = _{
-    LocalAttr* ~ Namespace
-  | LocalAttr* ~ Component
+Unit = {
+    Namespace
+  | Component
 }
 
-Namespace = { ^"namespace" ~ DefKey ~ "{" ~ Unit* ~ "}" }
-Component = _{ Inherit? ~ Object }
+Namespace = { LocalAttr* ~ ^"namespace" ~ DefKey ~ "{" ~ Unit* ~ "}" }
+Component = { LocalAttr* ~ Inherit? ~ ComponentKind }
     Inherit = { ^"from" ~ DefKey }
-
-Object = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
+    ComponentKind = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
 
     Aspect = { Hidden? ~ ^"aspect" ~ DefKey ~ String ~ String? ~ AspectDecays? ~ AspectStatementList? }
         AspectDecays = { "->" ~ DefKey }
@@ -52,7 +52,7 @@ Object = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
          }
 
     // Verb "recipe" id
-    Recipe = { RecipeKind ~ DefKey ~ ^"recipe" ~  DefKey ~ RecipeRequirements ~ MaxExecutions? ~ RecipeStage ~ (Inherit? ~ RecipeStage)* }
+    Recipe = { RecipeKind? ~ DefKey ~ ^"recipe" ~  DefKey ~ RecipeRequirements ~ MaxExecutions? ~ RecipeStage ~ (Inherit? ~ RecipeStage)* }
         RecipeKind = {
               ^"craft" ~ ^"hint"
             | ^"hint" ~  ^"craft"
@@ -64,7 +64,7 @@ Object = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
             | ^"!"
         }
         RecipeRequirements = { "(" ~ RecipeReq ~ ( "," ~ RecipeReq)* ~ ")" }
-            RecipeReq = {
+            RecipeReq = !{
                 ^"table" ~ QuantityDefPair
               | ^"extant" ~ QuantityDefPair
               | QuantityDefPair
@@ -82,8 +82,8 @@ Object = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
           | ^"ending" ~ DefKey ~ DefKey?
           | ^"halt" ~ DefKey?
           | ^"delete" ~ DefKey?
-          | SlotDef
           | Branch
+          | SlotDef
         }
         MaxExecutions = { ^"max" ~ Number }
         ApplyParams = {
@@ -96,7 +96,8 @@ Object = { Aspect | Card | Deck | Recipe | Verb | Legacy | Ending }
           | ^"goto" ~ DefKey ~ BranchCondition? ~ SpawningKind?
         }
             BranchCondition = {
-                ^"if" ~ Chance? ~ RecipeRequirements
+                ^"if" ~ RecipeRequirements
+              | ^"if" ~ Chance ~ RecipeRequirements 
               | Chance
             }
             SpawningKind = {
@@ -133,8 +134,8 @@ Xtrigger = { ^"xtrigger" ~ DefKey ~ "->" ~ XtriggerBody }
     }
 
 QuantityDefPair = {
-    DefKey
-  | DefKey ~ ":" ~ Number
+    DefKey ~ ":" ~ Number
+  | DefKey
 }
 
 DefKey = @{ DefKey_Char+ }

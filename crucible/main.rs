@@ -1,15 +1,12 @@
-extern crate pest;
-#[macro_use]
-extern crate pest_derive;
+#![allow(dead_code)]
 
 use std::path::PathBuf;
-
 use anyhow::{Result, bail};
 use tracing::{event, Level};
+use clap::Parser;
+use tracing_subscriber::FmtSubscriber;
 
 mod parser;
-use clap::{Parser, Subcommand, ValueEnum};
-use tracing_subscriber::FmtSubscriber;
 
 static LONG_ABOUT: &str = r#"Compile source code written in the Crucible programming language to Cultist Simulator JSON mod files.\n\"IN THE DESERT I WAIT IN THE RUINS I BURN - METAL IS WATER - STONE IS WAX - FLESH IS SMOKE - ENTER ME AND BE NO LONGER.\" - King Crucible"#;
 /* 
@@ -40,10 +37,12 @@ struct Args {
     /// with the `.crucible` extension.
     input: Vec<PathBuf>,
 
-    /// If set to true, Crucible will compress its
-    /// output and emit a `.lirc` file instead of `.lir`.
+    /// By default, Crucible will compress its
+    /// output and emit a `.lirc` file. Enable
+    /// this flag to force it to output non-compressed
+    /// `.lir` files.
     #[arg(short, long, action = clap::ArgAction::SetTrue)]
-    compress: bool,
+    no_compression: bool,
     
     /// Specify a custom output file to emit to.
     /// If no path is specified, defaults to the
@@ -114,5 +113,11 @@ async fn main() -> Result<()> {
         }
         valid_paths
     };
+    match parser::parse(valid_paths) {
+        Ok(c) => event!(Level::INFO, "{:#?}", c),
+        Err(e) => event!(Level::ERROR, "{}", e),
+    }
+
+    event!(Level::INFO, "Done");
     Ok(())
 }

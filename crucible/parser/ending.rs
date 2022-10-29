@@ -94,6 +94,7 @@ pub fn parse(input: &str) -> IResult<&str, Component> {
             music,
             animation,
             achievement,
+            other: content,
         })),
     ))
 }

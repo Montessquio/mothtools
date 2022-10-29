@@ -705,6 +705,8 @@ pub struct Ending {
     pub animation: EndingAnimationKind,
     /// Defines which achievement is unlocked by getting this ending.
     pub achievement: String,
+    /// All other JSON content tags
+    pub other: HashMap<String, json::Value>,
 }
 
 /// XTriggers allow a mutated aspect to modify itself. 

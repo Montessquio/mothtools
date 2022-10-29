@@ -15,8 +15,6 @@ mod string;
 mod aspect;
 mod card;
 mod deck;
-mod ending;
-mod legacy;
 mod recipe;
 mod verb;
 

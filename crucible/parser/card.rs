@@ -87,7 +87,7 @@ fn card_statement(input: &str) -> IResult<&str, CardStatement> {
     }
 
     fn card_slot(input: &str) -> IResult<&str, CardStatement> {
-        let (remain, xtrigger) = slot(input)?;
+    let (remain, xtrigger) = slot(input)?;
         Ok((remain, CardStatement::Slot((), ())))
     }
 

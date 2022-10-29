@@ -355,11 +355,42 @@ fn xtrigger(input: &str) -> IResult<&str, Xtrigger> {
 fn slot(input: &str) -> IResult<&str, Slot> {
     // returns (isConsume, isGreedy)
     pub fn slotkind(input: &str) -> IResult<&str, (Option<()>, Option<()>)> {
-        todo!()
+        let (remain, (isConsume, isGreedy)) = alt((
+            permutation((ws(tag("!")), ws(tag("?")))),
+            permutation((ws(tag_no_case("consume")), ws(tag_no_case("greedy")))),
+            pair(success::<_,_,_>(""), ws(tag("!"))),
+            pair(ws(tag("?")), success::<_,_,_>("")),
+            pair(success::<_,_,_>(""), ws(tag_no_case("consume"))),
+            pair(ws(tag_no_case("greedy")), success::<_,_,_>("")),
+        ))(input)?;
+
+        let isConsume = match isConsume.to_lowercase().as_str() {
+            "!" | "consume" => Some(()),
+            _ => None,
+        };
+
+        let isGreedy = match isGreedy.to_lowercase().as_str() {
+            "?" | "greedy" => Some(()),
+            _ => None,
+        };
+
+        Ok((remain, (isConsume, isGreedy)))
     }
     pub fn slotfilter(input: &str) -> IResult<&str, SlotFilter> {
-        todo!()
+        let (remain, (forbid, element, _, amount)) = tuple((
+            opt(char('!')),
+            defkey,
+            char(':'),
+            u32,
+        ))(input)?;
+
+        let filter = match forbid {
+            Some(_) => SlotFilter::Accept { element, amount },
+            None => SlotFilter::Forbid { element, amount },
+        };
+        Ok((remain, filter))
     }
+
     let (remain, (kind, _, id, label, description, requirements)) = tuple((
         opt(ws(slotkind)),
         ws(tag_no_case("slot")),
@@ -381,6 +412,7 @@ fn slot(input: &str) -> IResult<&str, Slot> {
         greedy = isGreedy.is_some();
     }
     let requirements = requirements.unwrap_or_else(|| Vec::new() );
+
     Ok((remain, Slot{ id, label, description, consumes, greedy, requirements }))
 }
 

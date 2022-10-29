@@ -603,15 +603,15 @@ pub struct Verb {
     pub id: DefKey,
     /// This is the title that appears in the 
     /// Verb UI when no card is inserted.
-    label: String,
+    pub label: String,
     /// This is the body text that appears in
     /// the verb UI when no card is inserted.
-    description: String,
+    pub description: String,
     /// Verbs can only have one [Slot].
     /// However, [Card]s can define
     /// additional slots that appear
     /// when they are inserted.
-    slot: Option<Slot>,
+    pub slot: Option<Slot>,
 }
 
 /// Legacies define the starting conditions

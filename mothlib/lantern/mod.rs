@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::{Deref, DerefMut}};
+use std::{collections::HashMap, ops::{Deref, DerefMut}, fmt::Display};
 use anyhow::{Result, bail};
 use either::Either;
 use serde::{Serialize, Deserialize};
@@ -8,6 +8,11 @@ pub mod json;
 /// An ID referencing an in-game component.
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct DefKey(pub String);
+impl Display for DefKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// Lantern Intermediate Representation format.
 /// This is the primary structure used to manipulate
@@ -123,10 +128,10 @@ pub struct Card {
     /// card when it is on the table as well as the
     /// title of the dialogue created when clicking 
     /// on the card.
-    label: String,
+    pub label: String,
     /// This is the body text that appears in the
     /// dialogue created when clicking on the card.
-    description: String,
+    pub description: String,
     /// If defined, the engine will set the icon
     /// of this card to the image with this name 
     /// (sans extension) found in either the game's 
@@ -134,7 +139,7 @@ pub struct Card {
     /// If None, the engine will search the same
     /// location for an image with the same name
     /// as the full id of the aspect.
-    icon: Option<String>,
+    pub icon: Option<String>,
     /// If defined, the engine will set the icon
     /// of this card when it is emitted as a verb
     /// to the image with this name (sans extension) 
@@ -142,7 +147,7 @@ pub struct Card {
     /// `<MOD_ROOT>/images/<TYPE>`.
     /// If None, the engine will use the default
     /// aspect icon.
-    verbicon: Option<String>,
+    pub verbicon: Option<String>,
     /// Whenever this card is present and face-up 
     /// (ie: not from effects or deckeffects) at the 
     /// conclusion of a recipe chain, the induced recipe 
@@ -152,30 +157,30 @@ pub struct Card {
     /// specified Verb is already on the table, but 
     /// it will ignore any requirements, extantreqs, 
     /// or tablereqs associated with the induced recipe.
-    induces: Option<(DefKey, Probability)>,
+    pub induces: Option<(DefKey, Probability)>,
     /// Specifies the card that this card
     /// will decay to when they are purged.
-    decays_to: Option<DefKey>,
+    pub decays_to: Option<DefKey>,
     /// If true, this card will not be shown in any in-game aspect lists.
     /// Implies "noArtNeeded" in the Cultist Simulator
     /// core schema.
-    hidden: bool,
+    pub hidden: bool,
     /// The list of aspects this card has by default.
     /// Each aspect on the card also has an associated degree,
     /// which is how much of that aspect is on the card.
-    aspects: HashMap<DefKey, u32>,
+    pub aspects: HashMap<DefKey, u32>,
     /// This is how long the card can last on the table before it decays.
     /// If None or 0, the card will not decay.
-    lifetime: Option<u32>,
+    pub lifetime: Option<u32>,
     /// Only applies to elements with lifetimes. 
     /// Normally, as the lifetime reaches 0, the art will 
     /// desaturate. If this value is true, the card will 
     /// start desaturated and gain saturation as it reaches 
     /// 0 (like depleted ability cards, such as Health [Fatigued]).
-    resaturate: bool,
+    pub resaturate: bool,
     /// If true, only one of this card can be present on the board.
     /// Spawning a new one will cause the old one to fade.
-    unique: bool,
+    pub unique: bool,
     /// Any other elements with the same aspect for their Uniqueness Group 
     /// cannot exist simultaneously on the board. 
     /// Placing one onto the board will cause all others on the board to vanish, 
@@ -188,13 +193,13 @@ pub struct Card {
     /// aspect ID, the uniqueness group will work as intended, but 
     /// any base recipes that contain any element with this undeclared 
     /// uniqueness group will be unable to spawn additional recipes.
-    uniqueness_group: Option<DefKey>,
+    pub uniqueness_group: Option<DefKey>,
     /// This field maps sets of slots to the verbs they appear in
     /// when this card is inserted into that verb.
-    slots: HashMap<DefKey, Vec<Slot>>,
+    pub slots: HashMap<DefKey, Vec<Slot>>,
     /// The list of [Xtrigger]s to run on this card when their
     /// conditions are met.
-    xtriggers: Vec<Xtrigger>,
+    pub xtriggers: Vec<Xtrigger>,
 }
 
 
@@ -548,24 +553,24 @@ pub struct Slot {
     /// This is the title text that appears above the
     /// slot as well as on the dialog produced when 
     /// the slot is clicked.
-    label: String,
+    pub label: String,
     /// This is the body text that appears appears on the
     /// dialog produced when the slot is clicked.
-    description: String,
+    pub description: String,
     /// After the recipe concludes, any element in this 
     /// slot will be destroyed. Shows the little candle 
     /// at the bottom of the slot.
-    consumes: bool,
+    pub consumes: bool,
     /// Specific to recipe slots (Quick-time events). 
     /// When this is true, the slot will pull a qualifying 
     /// card off the table into the slot automatically, 
     /// rather than letting the player choose whether to 
     /// insert a card, or which card to insert.
-    greedy: bool,
+    pub greedy: bool,
     /// A set of [SlotFilter]s to be applied to
     /// cards that try to be inserted into this
     /// slot.
-    requirements: Vec<SlotFilter>,
+    pub requirements: Vec<SlotFilter>,
 }
 
 /// A n element which is either required for or

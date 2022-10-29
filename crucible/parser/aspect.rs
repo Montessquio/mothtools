@@ -39,7 +39,7 @@ pub fn parse(input: &str) -> IResult<&str, Component> {
 }
 
 fn aspect_decays(input: &str) -> IResult<&str, DefKey> {
-    let (remain, (_, key)) = pair(ws(tag("=>")), ws(defkey))(input)?;
+    let (remain, (_, key)) = pair(ws(tag("->")), ws(defkey))(input)?;
     Ok((remain, key))
 }
 enum AspectStatement {

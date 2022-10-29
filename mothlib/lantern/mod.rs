@@ -217,20 +217,19 @@ pub struct Deck {
     /// This is the title text that appears on the
     /// dialog produced when a face-down card produced from it
     /// is clicked.
-    label: String,
+    pub label: String,
     /// This is the body text that appears appears on the
     /// dialog produced when a face-down card produced from it
     /// is clicked.
-    description: String,
+    pub description: String,
     /// If None, then the deck will reset itself
     /// once all its cards have been drawn.
     /// If Some, then the deck will supply a default
     /// card repeatedly once all other cards
     /// in the deck have been drawn. 
-    reset_on_exhaustion: Option<DefKey>,
+    pub default: Option<DefKey>,
     /// This is the list of cards that can be
     /// pulled from the deck.
-    cards: Vec<DefKey>,
     /// If this deck is a portal deck (i.e. it is 
     /// used by the "portals" function from either 
     /// the base game or a custom world made
@@ -240,7 +239,8 @@ pub struct Deck {
     /// from that deck and the player returns
     /// to the table. If this deck is not a portal
     /// deck, these values are ignored.
-    draw_messages: HashMap<DefKey, String>,
+    pub cards: Vec<(DefKey, Option<String>)>,
+    pub is_portal_deck: bool,
 }
 
 /// Defines the types of colors a recipe's

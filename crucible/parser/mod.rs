@@ -18,12 +18,21 @@ use nom::{
 
 mod string;
 
+mod aspect;
+mod card;
+mod deck;
+mod recipe;
+mod verb;
+mod legacy;
+mod ending;
+
 macro_rules! nomfail {
     ($input:expr) => {
         Err(nom::Err::Failure($input))
     };
 }
 
+#[allow(unused_macros)]
 macro_rules! nomerr {
     ($input:expr) => {
         Err(nom::Err::Error($input))
@@ -83,7 +92,7 @@ impl Crucible {
     }
 
     // Takes another Crucible instance and merges it into this one.
-    pub fn merge(&mut self, other: Crucible) -> Result<()> {
+    pub fn merge(&mut self, _other: Crucible) -> Result<()> {
         unimplemented!()
     }
 
@@ -215,13 +224,13 @@ impl Component {
 fn component(input: &str) -> IResult<&str, Unit> {
     fn component_inner(input: &str) -> IResult<&str, Component> {
         alt((
-            aspect,
-            card,
-            deck,
-            recipe,
-            verb,
-            legacy,
-            ending
+            aspect::parse,
+            card::parse,
+            deck::parse,
+            recipe::parse,
+            verb::parse,
+            legacy::parse,
+            ending::parse,
         ))(input)
     }
     let (remain, (attrs, inherits, component_inner)) = tuple((
@@ -245,57 +254,7 @@ fn hidden(input: &str) -> IResult<&str, ()> {
     Ok((remain, ()))
 }
 
-fn aspect(input: &str) -> IResult<&str, Component> {
-    fn aspect_decays(input: &str) -> IResult<&str, DefKey> {
-        let (remain, (_, key)) = pair(ws(tag("=>")), ws(defkey))(input)?;
-        Ok((remain, key))
-    }
-    enum AspectStatement {
-        // TODO 
-    }
-
-    fn aspect_statements(input: &str) -> IResult<&str, Vec<AspectStatement>> {
-       todo!()
-    }
-
-    let x = tuple((
-        opt(ws(hidden)),
-        ws(tag_no_case("aspect")),
-        ws(defkey),
-        ws(string::parse),
-        ws(string::parse),
-        ws(aspect_decays),
-        delimited(
-            ws(tag("{")),
-            aspect_statements,
-            ws(tag("}"))
-        ),
-    )); 
-
-    todo!()
-}
-
-fn card(input: &str) -> IResult<&str, Component> {
-    todo!()
-}
-
-fn deck(input: &str) -> IResult<&str, Component> {
-    todo!()
-}
-
-fn recipe(input: &str) -> IResult<&str, Component> {
-    todo!()
-}
-
-fn verb(input: &str) -> IResult<&str, Component> {
-    todo!()
-}
-
-fn legacy(input: &str) -> IResult<&str, Component> {
-    todo!()
-}
-
-fn ending(input: &str) -> IResult<&str, Component> {
+fn xtrigger(input: &str) -> IResult<&str, Xtrigger> {
     todo!()
 }
 
@@ -312,13 +271,23 @@ fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(inner: F) -> impl FnMut(&'a str) -> 
   )
 }
 
-pub fn comment<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, (), E>
+fn comment<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, (), E>
 {
     let (remainder, (_slashes, _comment)) = pair(tag("//"), is_not("\n\r"))(i)?;
     Ok((remainder, ()))
 }
 
-pub fn block_comment<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, (), E> {
+fn block_comment<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, (), E> {
     let (remainder, (_open, _comment, _close)) = tuple((tag("(*"), take_until("*)"), tag("*)")))(i)?;
     Ok((remainder, ()))
+}
+
+fn chance(input: &str) -> IResult<&str, Probability> {
+    let (remain, (num, _)) = pair(
+        verify(u8, |num| matches!(num, 0..=100)),
+        opt(char('%'))
+    )(input)?;
+    // The verify() combinator above makes sure the value
+    // is OK, so we can just unwrap here
+    Ok((remain, Probability::new(num).expect("Parser failed to uphold Probability invariant!")))
 }

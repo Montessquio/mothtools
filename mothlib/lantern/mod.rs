@@ -63,10 +63,10 @@ pub struct Aspect {
     pub id: DefKey,
     /// This is the title text that appears in the
     /// dialogue created when clicking on the aspect.
-    label: String,
+    pub label: String,
     /// This is the body text that appears in the
     /// dialogue created when clicking on the aspect.
-    description: String,
+    pub description: String,
     /// If defined, the engine will set the icon
     /// of this aspect to the image with this name 
     /// (sans extension) found in either the game's 
@@ -74,7 +74,7 @@ pub struct Aspect {
     /// If None, the engine will search the same
     /// location for an image with the same name
     /// as the full id of the aspect.
-    icon: Option<String>,
+    pub icon: Option<String>,
     /// If defined, the engine will set the icon
     /// of this aspect when it is emitted as a verb
     /// to the image with this name (sans extension) 
@@ -82,7 +82,7 @@ pub struct Aspect {
     /// `<MOD_ROOT>/images/<TYPE>`.
     /// If None, the engine will use the default
     /// aspect icon.
-    verbicon: Option<String>,
+    pub verbicon: Option<String>,
     /// Whenever this aspect is present and face-up 
     /// (ie: not from effects or deckeffects) at the 
     /// conclusion of a recipe chain, the induced recipe 
@@ -92,17 +92,19 @@ pub struct Aspect {
     /// specified Verb is already on the table, but 
     /// it will ignore any requirements, extantreqs, 
     /// or tablereqs associated with the induced recipe.
-    induces: Option<(DefKey, Probability)>,
+    pub induces: Option<(DefKey, Probability)>,
     /// Specifies the card that other cards with this
     /// element will decay to when they are purged.
-    decays_to: Option<DefKey>,
+    pub decays_to: Option<DefKey>,
     /// If true, this aspect will not be shown in any in-game aspect lists.
     /// Implies "noArtNeeded" in the Cultist Simulator
     /// core schema.
-    hidden: bool,
+    pub hidden: bool,
     /// The list of [Xtrigger]s to run on this aspect when their
     /// conditions are met.
-    xtriggers: Vec<Xtrigger>,
+    pub xtriggers: Vec<Xtrigger>,
+    /// Any other JSON members not otherwise specified in this struct.
+    pub others: HashMap<DefKey, json::Value>,
 }
 
 /// Cards are one of the two varians of the type

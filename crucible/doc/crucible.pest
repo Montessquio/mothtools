@@ -129,6 +129,7 @@ SlotDef = { SlotKind? ~ ^"slot" ~ DefKey ~ String ~ String ~ SlotParams? }
 Xtrigger = { ^"xtrigger" ~ DefKey ~ "->" ~ XtriggerBody }
     XtriggerBody = {
         DefKey ~ Chance?
+      | QuantityDefPair ~ Chance?
       | ^"spawn" ~ QuantityDefPair ~ Chance?
       | ^"mutate" ~ QuantityDefPair ~ Chance?
     }

@@ -255,7 +255,133 @@ fn hidden(input: &str) -> IResult<&str, ()> {
 }
 
 fn xtrigger(input: &str) -> IResult<&str, Xtrigger> {
-    todo!()
+    enum XtriggerKind {
+        Transform{ target: DefKey, amount: u32, chance: Probability },
+        Spawn{ target: DefKey, amount: u32, chance: Probability },
+        Mutate{ target: DefKey, amount: i32, chance: Probability },
+    }
+    pub fn spawn(input: &str) -> IResult<&str, XtriggerKind> {
+        let (remain, (_, _, target, _, amount, _, chance, _)) = tuple((
+            ws(tag_no_case("spawn")),
+            multispace0,
+            defkey,
+            char(':'),
+            u32,
+            multispace0,
+            opt(chance),
+            multispace0,
+        ))(input)?;
+
+        let chance = chance.unwrap_or(Probability::new(100).unwrap());
+        Ok((remain, XtriggerKind::Spawn{target, amount, chance}))
+    }
+    pub fn mutate(input: &str) -> IResult<&str, XtriggerKind> {
+        let (remain, (_, _, target, _, amount, _, chance, _)) = tuple((
+            ws(tag_no_case("mutate")),
+            multispace0,
+            defkey,
+            char(':'),
+            i32,
+            multispace0,
+            opt(chance),
+            multispace0,
+        ))(input)?;
+
+        let chance = chance.unwrap_or(Probability::new(100).unwrap());
+        Ok((remain, XtriggerKind::Mutate{target, amount, chance}))
+    }
+    pub fn transform(input: &str) -> IResult<&str, XtriggerKind> {
+        let (remain, (_, target, _, amount, _, chance, _)) = tuple((
+            multispace0,
+            defkey,
+            char(':'),
+            u32,
+            multispace0,
+            opt(chance),
+            multispace0,
+        ))(input)?;
+
+        let chance = chance.unwrap_or(Probability::new(100).unwrap());
+        Ok((remain, XtriggerKind::Transform{target, amount, chance}))
+    }
+    pub fn basic(input: &str) -> IResult<&str, XtriggerKind> {
+        let (remain, (target, chance)) = tuple((
+            ws(defkey),
+            opt(ws(chance)),
+        ))(input)?;
+
+        let chance = chance.unwrap_or(Probability::new(100).unwrap());
+        Ok((remain, XtriggerKind::Transform{ target, amount: 1, chance}))
+    }
+
+    let (remain, (_, catalyst, _, trigger_inner)) = tuple((
+        ws(tag("xtrigger")),
+        ws(defkey),
+        ws(tag("->")),
+        alt((
+            ws(spawn),
+            ws(mutate),
+            ws(transform),
+            ws(basic),
+        )),
+    ))(input)?;
+
+    let trigger = match trigger_inner {
+        XtriggerKind::Transform { target, amount, chance } => Xtrigger::Transform { 
+            catalyst, 
+            transforms_to: target, 
+            amount, 
+            chance
+        },
+        XtriggerKind::Spawn { target, amount, chance } => Xtrigger::Spawn { 
+            catalyst, 
+            creates: target, 
+            amount,
+            chance
+        },
+        XtriggerKind::Mutate { target, amount, chance } => Xtrigger::Mutate { 
+            catalyst, 
+            adds_to_catalyst: target, 
+            amount, 
+            chance
+        },
+    };
+
+    Ok((remain, trigger))
+}
+
+/// Parses a single SlotDef. Does not parse predicates, such
+/// as the verbs in a card's slot def.
+fn slot(input: &str) -> IResult<&str, Slot> {
+    // returns (isConsume, isGreedy)
+    pub fn slotkind(input: &str) -> IResult<&str, (Option<()>, Option<()>)> {
+        todo!()
+    }
+    pub fn slotfilter(input: &str) -> IResult<&str, SlotFilter> {
+        todo!()
+    }
+    let (remain, (kind, _, id, label, description, requirements)) = tuple((
+        opt(ws(slotkind)),
+        ws(tag_no_case("slot")),
+        ws(defkey),
+        ws(string::parse),
+        ws(string::parse),
+        opt(
+            delimited(
+                ws(char('(')), 
+                separated_list0(char(','), slotfilter), 
+                ws(char(')')))
+        )
+    ))(input)?;
+
+    let mut consumes = false;
+    let mut greedy = false;
+    if let Some((isConsume, isGreedy)) = kind {
+        consumes = isConsume.is_some();
+        greedy = isGreedy.is_some();
+    }
+    let requirements = requirements.unwrap_or_else(|| Vec::new() );
+    Ok((remain, Slot{ id, label, description, consumes, greedy, requirements }))
 }
 
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and 

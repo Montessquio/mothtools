@@ -710,13 +710,13 @@ pub struct Ending {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum Xtrigger {
     /// The default behavior of an Xtrigger. A catalyzing element is turned into
-    /// another element with the specified probability. The effect of *amount*
-    /// is currently unknown.
-    Transform{ catalyst: DefKey, transforms_to: DefKey, amount: Option<i32>, chance: Option<Probability> },
+    /// another element with the specified probability. Level is used to determine
+    /// the size of the new stack.
+    Transform{ catalyst: DefKey, transforms_to: DefKey, amount: u32, chance: Probability },
     /// Create `amount` new cards when the catalyzing element is triggered with the specified probability.
-    Spawn{ catalyst: DefKey, creates: DefKey, amount: u32, chance: Option<Probability>},
+    Spawn{ catalyst: DefKey, creates: DefKey, amount: u32, chance: Probability},
     /// Apply an aspect to a card in the specified amount with the specified probabilty.
-    Mutate{ catalyst: DefKey, adds_to_catalyst: DefKey, amount: i32, chance: Option<Probability>}
+    Mutate{ catalyst: DefKey, adds_to_catalyst: DefKey, amount: i32, chance: Probability}
 }
 
 /// u8 clamped from 0-100

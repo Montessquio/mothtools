@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::{Deref, DerefMut}, fmt::Display};
+use std::{collections::HashMap, ops::{Deref, DerefMut}, fmt::Display, borrow::Borrow};
 use anyhow::{Result, bail};
 use either::Either;
 use serde::{Serialize, Deserialize};
@@ -699,10 +699,10 @@ pub struct Ending {
     /// The image shown on the left of the ending screen
     pub image: String,
     /// The kind of music that plays during the ending.
-    pub music: Option<EndingMusicKind>,
+    pub music: EndingMusicKind,
     /// Decides the color of the lights and cosmetics of the ending
     /// transition.
-    pub animation: Option<EndingAnimationKind>,
+    pub animation: EndingAnimationKind,
     /// Defines which achievement is unlocked by getting this ending.
     pub achievement: String,
 }

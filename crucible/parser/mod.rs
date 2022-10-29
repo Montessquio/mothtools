@@ -490,14 +490,31 @@ fn slot(input: &str) -> IResult<&str, Slot> {
     ))
 }
 
+fn chance(input: &str) -> IResult<&str, Probability> {
+    let (remain, (num, _)) = pair(verify(u8, |num| matches!(num, 0..=100)), opt(char('%')))(input)?;
+    // The verify() combinator above makes sure the value
+    // is OK, so we can just unwrap here
+    Ok((
+        remain,
+        Probability::new(num).expect("Parser failed to uphold Probability invariant!"),
+    ))
+}
+
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
-/// trailing whitespace, returning the output of `inner`.
+/// trailing whitespace, returning the output of `inner`. It also consumed and discards comments of any kind.
 fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(
     inner: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
     F: Fn(&'a str) -> IResult<&'a str, O, E>,
 {
+    fn space_or_comment(input: &str) -> IResult<&str, ()> {
+        fn multispace_0_wrapper(input: &str) -> IResult<&str, ()> {
+            let (remain, _) = multispace0(input)?;
+            Ok((remain, ()))
+        }
+        alt((comment, block_comment, multispace_0_wrapper))(input)
+    }
     delimited(multispace0, inner, multispace0)
 }
 
@@ -510,14 +527,4 @@ fn block_comment<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, (),
     let (remainder, (_open, _comment, _close)) =
         tuple((tag("(*"), take_until("*)"), tag("*)")))(i)?;
     Ok((remainder, ()))
-}
-
-fn chance(input: &str) -> IResult<&str, Probability> {
-    let (remain, (num, _)) = pair(verify(u8, |num| matches!(num, 0..=100)), opt(char('%')))(input)?;
-    // The verify() combinator above makes sure the value
-    // is OK, so we can just unwrap here
-    Ok((
-        remain,
-        Probability::new(num).expect("Parser failed to uphold Probability invariant!"),
-    ))
 }

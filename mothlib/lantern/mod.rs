@@ -333,12 +333,12 @@ pub struct BranchCondition {
     /// A branch will only be followed if a random
     /// value between 1 and 100 is less than or equal
     /// to `chance`. If None, defaults to 100%.
-    chance: Option<Probability>,
+    pub chance: Option<Probability>,
     /// A branch will only be followed if all its
     /// [RecipeRequirement]s are satisfied.
     /// If `requirements` is empty, then
     /// it will always be considered satisfied.
-    requirements: Vec<RecipeRequirement>
+    pub requirements: Vec<RecipeRequirement>
 }
 
 /// Defines the branching behavior when
@@ -391,9 +391,9 @@ pub struct Mutation {
     /// Used to find the card or aspect that will be modified.
     pub id: DefKey,
     /// The aspect we are adding/removing on the element. 
-    aspect: DefKey,
+    pub aspect: DefKey,
     /// The operation to commit
-    operation: ValueOperation,
+    pub operation: ValueOperation,
 }
 
 /// A recipe is a "sentence". They
@@ -408,54 +408,54 @@ pub struct Recipe {
     /// "core.recipes" -> id = "core.recipes.exitmansuswood"
     pub id: DefKey,
     /// The ID of the verb which this recipe executes in.
-    verb: DefKey,
+    pub verb: DefKey,
     /// The title of the verb dialogue will be set to this
     /// value when the recipe begins.
-    label: String,
+    pub label: String,
     /// The text body of the verb dialogue will be set to this
     /// value when the recipe begins, and will persist while
     /// the warmup runs.
-    description: String,
+    pub description: String,
     /// The text body of the verb dialogue will be set
     /// to this value when the recipe finishes successfully.
     /// This text is never displayed if the recipe routes to 
     /// another linked recipe, as the action is not considered 
     /// completed until a recipe ends without starting another one.
-    end_description: String,
+    pub end_description: String,
     /// This is the image filename of a png file 
     /// located in the “images/burns” folder that 
     /// you’d like to display on the board when 
     /// the recipe begins.
-    burn: Option<String>,
+    pub burn: Option<String>,
     /// This is the property that tells a recipe to transition 
     /// into the Mansus and which door to open to. This causes 
     /// the recipe to draw a card from each deck associated 
     /// with the door and let you choose from them on the board.
-    portal: Option<String>,
+    pub portal: Option<String>,
     /// Defines a set of [RecipeRequirement]s which must all
     /// be satisfied in order for the recipe to be executed.
     /// These requirements will be ignored if another recipe
     /// explicitly defines different requirements.
-    requirements: Vec<RecipeRequirement>,
+    pub requirements: Vec<RecipeRequirement>,
     /// This is the maximum number of times you want to 
     /// allow the recipe to be executed.
-    max_executions: u32,
+    pub max_executions: u32,
     /// This is the length of the timer that counts down 
     /// after starting a recipe. If the recipe is executed 
     /// as an Alternative Recipe, this property is not 
     /// needed, and will be ignored.
-    warmup: u32,
+    pub warmup: u32,
     /// Defines whether or not the user is able to manually
     /// start this recipe in its verb if the requirements are met.
-    craftable: bool,
+    pub craftable: bool,
     /// This disables the start button but still displays the 
     /// recipe when true. If the requirements for a hint recipe 
     /// and a normal, craftable recipe are met, the normal 
     /// recipe is preferred. Hintonly recipes do not need to also have craftable set to true.
-    hint_only: bool,
+    pub hint_only: bool,
     /// Defines the slot for a quick-time event that a user may
     /// insert cards into during the warmup period of this recipe.
-    slot: Option<Slot>,
+    pub slot: Option<Slot>,
     /// A set of operations to apply to the element stack. 
     /// 
     /// When an element is added, it will be added as a 
@@ -475,7 +475,7 @@ pub struct Recipe {
     /// example, having "element_1" : "element_2" will 
     /// create as many new "element_1"s as there are 
     /// "element_2"s in the recipe stack.
-    effects: HashMap<DefKey, ValueOperation>,
+    pub effects: HashMap<DefKey, ValueOperation>,
     /// A set of operations to apply to the game board. 
     /// 
     /// It will decay up to the specified amount of the element sources. 
@@ -499,7 +499,7 @@ pub struct Recipe {
     /// decayTo will be ignored; instead, each element that has the aspect 
     /// will decay according to its own decayTo aspect. If the individual 
     /// element has no decayTo aspect, then it is destroyed.
-    purge: HashMap<DefKey, u32>,
+    pub purge: HashMap<DefKey, u32>,
     /// A set of operations to apply to the recipe’s 
     /// aspect stack. The aspect stack is the sum 
     /// of all the aspects of the cards in the element 
@@ -510,14 +510,14 @@ pub struct Recipe {
     /// purpose of triggering an XTrigger reaction, 
     /// since the aspects disappear after the recipe 
     /// ends, and don't proc inductions.
-    aspects: HashMap<DefKey, ValueOperation>,
+    pub aspects: HashMap<DefKey, ValueOperation>,
     /// A set of deck IDs that are drawn from the specified 
     /// number of times and added to the element list at 
     /// the conclusion of the recipe.
-    draws: HashMap<DefKey, i32>,
+    pub draws: HashMap<DefKey, i32>,
     /// A list of all [Mutation]s to apply to the
     /// elements in this recipe.
-    mutations: Vec<Mutation>,
+    pub mutations: Vec<Mutation>,
     /// Halts the specified Verb up to the given 
     /// number of different tokens. The active 
     /// recipe transitions into a closable form 
@@ -526,17 +526,17 @@ pub struct Recipe {
     /// Ending the recipe in the Verb will delete
     /// the Verb token and return any cards still 
     /// in the stack.
-    halt: Option<HashMap<DefKey, u32>>,
+    pub halt: Option<HashMap<DefKey, u32>>,
     /// This halts the specified Verbs and deletes the 
     /// tokens at the same time, also deleting any 
     /// elements within the Verbs at the time of deletion.
-    delete: Option<HashMap<DefKey, u32>>,
+    pub delete: Option<HashMap<DefKey, u32>>,
     /// The ID of an ending you’d like to trigger at the conclusion of this recipe.
-    ending: Option<DefKey>,
+    pub ending: Option<DefKey>,
     /// Audiovisual style for the warmup circle.
-    style: WarmupStyle,
+    pub style: WarmupStyle,
     /// All the possible [Branch]es that this element could take.
-    branches: Vec<Branch>
+    pub branches: Vec<Branch>
 }
 
 /// A place to put a card, which could be used in
@@ -625,29 +625,29 @@ pub struct Legacy {
     /// "core.legacy" -> id = "core.legacy.apostlelantern"
     pub id: DefKey,
     /// The name of the Legacy as the player sees it
-    label: String,
+    pub label: String,
     /// Text displayed in the Legacy Selection screen
-    description: String,
+    pub description: String,
     /// Text displayed in the pop-up bubble at the bottom-center screen after starting the game.
-    start_description: String,
+    pub start_description: String,
     /// The image for the legacy displayed at the Legacy Selection screen
-    image: String,
+    pub image: String,
     /// Legacies all start with only a single [Verb] on the board, as defined here.
-    starting_verb: DefKey,
+    pub starting_verb: DefKey,
     /// A dictionary of the [Card]s that the legacy starts with.
-    starting_cards: HashMap<DefKey, u32>,
+    pub starting_cards: HashMap<DefKey, u32>,
     /// A list of up to four [Card]s or [Aspect]s. 
     /// 
     /// These elements quantities and icons will be displayed 
     /// at the bottom of the screen for the playthrough. 
-    status_bar_elems: Vec<DefKey>,
+    pub status_bar_elems: Vec<DefKey>,
     /// A list of the ids of the legacies that cannot 
     /// be among the next proposed ones after this one
-    exclude_after_legacies: Vec<DefKey>,
+    pub exclude_after_legacies: Vec<DefKey>,
     /// When true, the legacy icon is added to the area where 
     /// the DLC legacies are and lets you start a new game by 
     /// clicking on the legacy icon.
-    new_start: bool,
+    pub new_start: bool,
     /// Defining an ending here will make this legacy guaranteed to 
     /// appear after that ending; unless that ending has more than 
     /// three associated Legacies, in which case three associated 
@@ -655,11 +655,11 @@ pub struct Legacy {
     /// Ending can be defined; when one Legacy is desired to be 
     /// available from more than one Ending, look-alike Legacies 
     /// are often defined.
-    from_ending: DefKey,
+    pub from_ending: DefKey,
     /// This value is true for usual legacies. Setting it to false requires 
     /// the predefined ending to be achieved for the legacy to appear. 
     /// This is set to false for Apostle legacies.
-    available_without_ending_match: bool,
+    pub available_without_ending_match: bool,
 }
 
 /// Decides the music played during the ending
@@ -693,18 +693,18 @@ pub struct Ending {
     /// "core.ending" -> id = "core.ending.apostlelantern"
     pub id: DefKey,
     /// The name of the Ending as displayed on the Ending Screen to the player.
-    label: String,
+    pub label: String,
     // The text shown to the player on the ending screen
-    description: String,
+    pub description: String,
     /// The image shown on the left of the ending screen
-    image: String,
+    pub image: String,
     /// The kind of music that plays during the ending.
-    music: Option<EndingMusicKind>,
+    pub music: Option<EndingMusicKind>,
     /// Decides the color of the lights and cosmetics of the ending
     /// transition.
-    animation: Option<EndingAnimationKind>,
+    pub animation: Option<EndingAnimationKind>,
     /// Defines which achievement is unlocked by getting this ending.
-    achievement: String,
+    pub achievement: String,
 }
 
 /// XTriggers allow a mutated aspect to modify itself. 
